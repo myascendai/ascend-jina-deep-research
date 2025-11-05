@@ -278,6 +278,14 @@ export interface ChatCompletionRequest {
   search_language_code?: string;
   search_provider?: string;
   team_size?: number;
+
+  // Prompt template configuration
+  system_prompt_template?: 'person_research' | 'person_research_full' | 'default' | string;
+  prompt_variables?: {
+    name?: string;
+    known_info?: string;
+    [key: string]: any;
+  };
 }
 
 export interface URLAnnotation {

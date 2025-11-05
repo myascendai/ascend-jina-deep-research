@@ -17,6 +17,8 @@ import { jsonSchema } from "ai"; // or another converter library
 import { normalizeHostName } from "./utils/url-tools";
 import { logInfo, logError, logDebug, logWarning } from './logging';
 import { body, validationResult } from 'express-validator';
+import { buildCompactPersonResearchPrompt } from './prompts/person-research-compact';
+import { buildPersonResearchPrompt } from './prompts/person-research';
 
 const app = express();
 
@@ -463,6 +465,47 @@ app.post('/v1/chat/completions', validationRules, (async (req: Request, res: Res
   }
 
   logDebug('Input messages', { messages: body.messages });
+
+  // Handle system prompt template
+  if (body.system_prompt_template && body.system_prompt_template !== 'default') {
+    let promptContent: string;
+
+    if (body.system_prompt_template === 'person_research') {
+      // Use compact version embedded in user message to save tokens
+      const name = body.prompt_variables?.name || 'the subject';
+      const knownInfo = body.prompt_variables?.known_info;
+      promptContent = buildCompactPersonResearchPrompt(name, knownInfo);
+    } else if (body.system_prompt_template === 'person_research_full') {
+      // Full version for when detailed instructions are needed
+      const name = body.prompt_variables?.name || 'the subject';
+      const knownInfo = body.prompt_variables?.known_info;
+      promptContent = buildPersonResearchPrompt(name, knownInfo);
+    } else {
+      // Custom template provided as string
+      promptContent = body.system_prompt_template;
+    }
+
+    // Prepend to the last user message instead of using system message
+    // This ensures the prompt is only sent once, not repeated in every reasoning step
+    const lastUserMessageIndex = body.messages.map((m, i) => m.role === 'user' ? i : -1)
+      .filter(i => i >= 0)
+      .pop();
+
+    if (lastUserMessageIndex !== undefined) {
+      const existingContent = body.messages[lastUserMessageIndex].content;
+      const existingText = typeof existingContent === 'string'
+        ? existingContent
+        : existingContent.filter((c: any) => c.type === 'text').map((c: any) => c.text).join('\n');
+
+      body.messages[lastUserMessageIndex].content = `${promptContent}\n\n---\n\n${existingText}`;
+    }
+
+    logInfo('Applied prompt template', {
+      template: body.system_prompt_template,
+      variables: body.prompt_variables,
+      method: 'embedded_in_user_message'
+    });
+  }
 
   let { tokenBudget, maxBadAttempts } = getTokenBudgetAndMaxAttempts(
     body.reasoning_effort,
