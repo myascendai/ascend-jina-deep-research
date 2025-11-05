@@ -15,14 +15,18 @@ function getPrompt(mdContent: string, allKnowledge: KnowledgeItem[], schema: Sch
 
 Your task is to revise the provided markdown content (written by your junior intern) while preserving its original vibe, delivering a polished and professional version.
 
+CRITICAL: If the content contains explicit formatting instructions (such as "OUTPUT FORMAT:", "CRITICAL REQUIREMENTS:", section headers with "## 1.", "## 2." etc., or structured bullet point lists), you MUST preserve that exact structure and format. Do NOT convert structured content into narrative prose. Only apply narrative editing rules when the content does not have explicit formatting requirements.
+
 <structure>
-- Begin with fact-driven statement of the main question or issue you'll address
-- Develop your argument using a logical progression of ideas while allowing for occasional contemplative digressions that enrich the reader's understanding
-- Organize paragraphs with clear topic sentences but vary paragraph length to create rhythm and emphasis, do not use bullet points or numbered lists.
-- Write section headers as single phrases without colons (##, ###) to organize long content. Strictly avoid headers with colons like 'The Digital Revolution: Transforming Modern Business'. Instead use 'Digital Transformation in Business'.
-- Present facts, quotes and data points with minimal hedging
-- Conclude with both a definitive statement of your position and a thought-provoking reflection that leaves readers pondering deeper implications.
-- Remove all disclaimer and copyright notices at the end of the content.
+- IF the content has explicit formatting requirements (like numbered sections "## 1. SECTION", bullet points as primary format, "OUTPUT FORMAT:" instructions), PRESERVE that structure exactly. Do not convert to narrative prose.
+- OTHERWISE, for narrative content:
+  - Begin with fact-driven statement of the main question or issue you'll address
+  - Develop your argument using a logical progression of ideas while allowing for occasional contemplative digressions that enrich the reader's understanding
+  - Organize paragraphs with clear topic sentences but vary paragraph length to create rhythm and emphasis, do not use bullet points or numbered lists.
+  - Write section headers as single phrases without colons (##, ###) to organize long content. Strictly avoid headers with colons like 'The Digital Revolution: Transforming Modern Business'. Instead use 'Digital Transformation in Business'.
+  - Present facts, quotes and data points with minimal hedging
+  - Conclude with both a definitive statement of your position and a thought-provoking reflection that leaves readers pondering deeper implications.
+  - Remove all disclaimer and copyright notices at the end of the content.
 </structure>
 
 
@@ -44,13 +48,14 @@ Your task is to revise the provided markdown content (written by your junior int
 </content-approach>
 
 <rules>
-1. Avoid any bullet points or numbered lists, use natural language instead.
-2. Extend the content with 5W1H strategy and add more details to make it more informative and engaging. Use available knowledge to ground facts and fill in missing information.
-3. Fix any broken tables, lists, code blocks, footnotes, or formatting issues.
-4. Tables are good! But they must always in basic HTML table syntax with proper <table> <thead> <tr> <th> <td> without any CSS styling. STRICTLY AVOID any markdown table syntax. HTML Table should NEVER BE fenced with (\`\`\`html) triple backticks.
-5. Replace any obvious placeholders or Lorem Ipsum values such as "example.com" with the actual content derived from the knowledge.
-6. Latex are good! When describing formulas, equations, or mathematical concepts, you are encouraged to use LaTeX or MathJax syntax.
-7. Your output language must be the same as user input language.
+1. If the content has explicit formatting requirements (numbered sections, structured bullet lists, "OUTPUT FORMAT:" instructions), PRESERVE that format exactly. Do NOT convert to narrative prose.
+2. For narrative content without explicit formatting, avoid bullet points or numbered lists, use natural language instead.
+3. Extend the content with 5W1H strategy and add more details to make it more informative and engaging. Use available knowledge to ground facts and fill in missing information.
+4. Fix any broken tables, lists, code blocks, footnotes, or formatting issues.
+5. Tables are good! But they must always in basic HTML table syntax with proper <table> <thead> <tr> <th> <td> without any CSS styling. STRICTLY AVOID any markdown table syntax. HTML Table should NEVER BE fenced with (\`\`\`html) triple backticks.
+6. Replace any obvious placeholders or Lorem Ipsum values such as "example.com" with the actual content derived from the knowledge.
+7. Latex are good! When describing formulas, equations, or mathematical concepts, you are encouraged to use LaTeX or MathJax syntax.
+8. Your output language must be the same as user input language.
 </rules>
 
 
