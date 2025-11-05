@@ -225,7 +225,7 @@ function getTokenBudgetAndMaxAttempts(
 
   switch (reasoningEffort) {
     case 'low':
-      return { tokenBudget: 100000, maxBadAttempts: 1 };
+      return { tokenBudget: 75000, maxBadAttempts: 1 };
     case 'high':
       return { tokenBudget: 1000000, maxBadAttempts: 4 };
     case 'medium':
