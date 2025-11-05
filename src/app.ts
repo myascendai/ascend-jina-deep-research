@@ -729,9 +729,15 @@ app.post('/v1/chat/completions', validationRules, (async (req: Request, res: Res
         readerCount,
       };
 
+      const usageDetails = context.tokenTracker.getTotalUsageSnakeCase();
       logInfo(`[chat/completions] Completed!`, {
         model: body.model,
-        usage: context.tokenTracker.getTotalUsageSnakeCase(),
+        usage: {
+          input_tokens: usageDetails.input_tokens,
+          output_tokens: usageDetails.output_tokens,
+          total_tokens: usageDetails.total_tokens,
+          breakdown: usageDetails.breakdown
+        },
         visitedURLs,
         readURLs,
         numURLs: allURLs.length,

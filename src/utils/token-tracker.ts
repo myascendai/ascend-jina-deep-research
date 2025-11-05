@@ -41,16 +41,62 @@ export class TokenTracker extends EventEmitter {
     }, { promptTokens: 0, completionTokens: 0, totalTokens: 0 });
   }
 
-  getTotalUsageSnakeCase(): { prompt_tokens: number, completion_tokens: number, total_tokens: number } {
-    return this.usages.reduce((acc, { usage }) => {
-      // CompletionTokens > 0 means LLM usage, apply 3x multiplier
-      // const scaler = usage.completionTokens > 0 ? 3 
-      const scaler = 1;
-      acc.prompt_tokens += usage.promptTokens * scaler;
-      acc.completion_tokens += usage.completionTokens * scaler;
-      acc.total_tokens += usage.totalTokens * scaler;
+  getTotalUsageSnakeCase(): {
+    input_tokens: number;
+    output_tokens: number;
+    total_tokens: number;
+    prompt_tokens: number;
+    completion_tokens: number;
+    breakdown: Record<string, { input_tokens?: number; output_tokens?: number; total_tokens: number }>;
+  } {
+    const breakdown: Record<string, { input_tokens: number; output_tokens: number; total_tokens: number }> = {};
+
+    // Categorize tools into service groups
+    const serviceMap: Record<string, string> = {
+      'agent': 'llm',
+      'agentBeastMode': 'llm',
+      'coder': 'llm',
+      'evaluator': 'llm',
+      'errorAnalyzer': 'llm',
+      'queryRewriter': 'llm',
+      'researchPlanner': 'llm',
+      'serpCluster': 'llm',
+      'finalizer': 'llm',
+      'reducer': 'llm',
+      'fallback': 'llm',
+      'read': 'jina_reader',
+      'embeddings': 'jina_embeddings',
+      'rerank': 'jina_rerank',
+      'search': 'jina_search',
+    };
+
+    // Calculate breakdown by service
+    this.usages.forEach(({ tool, usage }) => {
+      const service = serviceMap[tool] || tool;
+      if (!breakdown[service]) {
+        breakdown[service] = { input_tokens: 0, output_tokens: 0, total_tokens: 0 };
+      }
+      breakdown[service].input_tokens += usage.promptTokens;
+      breakdown[service].output_tokens += usage.completionTokens;
+      breakdown[service].total_tokens += usage.totalTokens;
+    });
+
+    const totals = this.usages.reduce((acc, { usage }) => {
+      acc.input_tokens += usage.promptTokens;
+      acc.output_tokens += usage.completionTokens;
+      acc.total_tokens += usage.totalTokens;
       return acc;
-    }, { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 });
+    }, { input_tokens: 0, output_tokens: 0, total_tokens: 0 });
+
+    return {
+      input_tokens: totals.input_tokens,
+      output_tokens: totals.output_tokens,
+      total_tokens: totals.total_tokens,
+      // Legacy fields for backward compatibility
+      prompt_tokens: totals.input_tokens,
+      completion_tokens: totals.output_tokens,
+      breakdown,
+    };
   }
 
   getUsageBreakdown(): Record<string, number> {

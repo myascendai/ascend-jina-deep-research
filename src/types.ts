@@ -303,9 +303,21 @@ export interface ChatCompletionResponse {
     finish_reason: 'stop' | 'error';
   }>;
   usage: {
+    input_tokens: number;
+    output_tokens: number;
+    total_tokens: number;
+    // Legacy fields for backward compatibility
     prompt_tokens: number;
     completion_tokens: number;
-    total_tokens: number;
+    // Detailed breakdown by service/tool
+    breakdown?: {
+      llm?: { input_tokens: number; output_tokens: number; total_tokens: number };
+      jina_reader?: { total_tokens: number };
+      jina_embeddings?: { total_tokens: number };
+      jina_rerank?: { total_tokens: number };
+      jina_search?: { total_tokens: number };
+      [key: string]: { input_tokens?: number; output_tokens?: number; total_tokens: number } | undefined;
+    };
   };
   visitedURLs?: string[];
   readURLs?: string[];
