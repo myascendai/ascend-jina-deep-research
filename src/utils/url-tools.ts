@@ -475,6 +475,7 @@ export async function processURLs(
   question: string,
   webContents: Record<string, WebContent>,
   withImages: boolean = false,
+  readerCount?: { count: number }
 ): Promise<{ urlResults: any[], success: boolean }> {
   // Skip if no URLs to process
   if (urls.length === 0) {
@@ -505,6 +506,12 @@ export async function processURLs(
 
         const { response } = await readUrl(url, true, context.tokenTracker, withImages);
         const { data } = response;
+
+        // Increment reader count if provided
+        if (readerCount) {
+          readerCount.count++;
+        }
+
         const guessedTime = await getLastModified(url);
         if (guessedTime) {
           logDebug(`Guessed time for ${url}: ${guessedTime}`);

@@ -600,6 +600,8 @@ app.post('/v1/chat/completions', validationRules, (async (req: Request, res: Res
       readURLs,
       allURLs,
       imageReferences,
+      searchCount,
+      readerCount,
     } = await getResponse(undefined,
       tokenBudget,
       maxBadAttempts,
@@ -694,6 +696,8 @@ app.post('/v1/chat/completions', validationRules, (async (req: Request, res: Res
         readURLs,
         numURLs: allURLs.length,
         relatedImages: body.with_images ? (imageReferences?.map(ref => ref.url) || []) : undefined,
+        searchCount,
+        readerCount,
       };
       res.write(`data: ${JSON.stringify(finalChunk)}\n\n`);
       res.end();
@@ -721,6 +725,8 @@ app.post('/v1/chat/completions', validationRules, (async (req: Request, res: Res
         readURLs,
         numURLs: allURLs.length,
         relatedImages: body.with_images ? (imageReferences?.map(ref => ref.url) || []) : undefined,
+        searchCount,
+        readerCount,
       };
 
       logInfo(`[chat/completions] Completed!`, {
@@ -729,6 +735,8 @@ app.post('/v1/chat/completions', validationRules, (async (req: Request, res: Res
         visitedURLs,
         readURLs,
         numURLs: allURLs.length,
+        searchCount,
+        readerCount,
       });
 
       logDebug('[chat/completions] Final answer preview:', {
@@ -738,7 +746,13 @@ app.post('/v1/chat/completions', validationRules, (async (req: Request, res: Res
         annotationsCount: annotations?.length || 0
       });
 
-      res.json(response);
+      try {
+        res.json(response);
+        logInfo('[chat/completions] Response sent successfully');
+      } catch (sendError) {
+        logError('[chat/completions] Failed to send response:', { error: sendError });
+        throw sendError;
+      }
     }
   } catch (error: any) {
     logError('[chat/completions] Error:', {

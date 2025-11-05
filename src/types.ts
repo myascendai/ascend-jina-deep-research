@@ -312,6 +312,8 @@ export interface ChatCompletionResponse {
   numURLs?: number;
   allImages?: string[];
   relatedImages?: string[];
+  searchCount?: number;
+  readerCount?: number;
 }
 
 export interface ChatCompletionChunk {
@@ -339,6 +341,8 @@ export interface ChatCompletionChunk {
   numURLs?: number;
   allImages?: string[];
   relatedImages?: string[];
+  searchCount?: number;
+  readerCount?: number;
 }
 
 // Tracker Types

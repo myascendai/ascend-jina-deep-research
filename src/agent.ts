@@ -437,7 +437,7 @@ export async function getResponse(question?: string,
   searchProvider?: string,
   withImages: boolean = false,
   teamSize: number = 1
-): Promise<{ result: StepAction; context: TrackerContext; visitedURLs: string[], readURLs: string[], allURLs: string[], imageReferences?: ImageReference[] }> {
+): Promise<{ result: StepAction; context: TrackerContext; visitedURLs: string[], readURLs: string[], allURLs: string[], imageReferences?: ImageReference[], searchCount: number, readerCount: number }> {
 
   let step = 0;
   let totalStep = 0;
@@ -499,6 +499,8 @@ export async function getResponse(question?: string,
   const badURLs: string[] = [];
   const imageObjects: ImageObject[] = [];
   const evaluationMetrics: Record<string, RepeatEvaluationType[]> = {};
+  let searchCount = 0;  // Track number of search queries
+  const readerCountRef = { count: 0 };  // Track number of Jina Reader calls (using object for pass-by-reference)
   // reserve the 10% final budget for the beast mode
   const regularBudget = tokenBudget * 0.85;
   const finalAnswerPIP: string[] = [];
@@ -819,6 +821,7 @@ But then you realized you have asked them before. You decided to to think out of
         undefined,
         searchProvider,
       );
+      searchCount += searchedQueries.length;  // Track search count
 
       allKeywords.push(...searchedQueries);
       allKnowledge.push(...newKnowledge);
@@ -894,6 +897,7 @@ But then you realized you have asked them before. You decided to to think out of
             onlyHostnames,
             searchProvider
           );
+        searchCount += searchedQueries.length;  // Track search count
 
         if (searchedQueries.length > 0) {
           anyResult = true;
@@ -955,7 +959,8 @@ You decided to think out of the box or cut from a completely different angle.
           SchemaGen,
           currentQuestion,
           allWebContents,
-          withImages
+          withImages,
+          readerCountRef
         );
 
         diaryContext.push(success
@@ -1146,6 +1151,8 @@ But unfortunately, you failed to solve the issue. You need to think out of the b
     readURLs: visitedURLs.filter(url => !badURLs.includes(url)),
     allURLs: weightedURLs.map(r => r.url),
     imageReferences: withImages ? (thisStep as AnswerAction).imageReferences : undefined,
+    searchCount,
+    readerCount: readerCountRef.count,
   };
 }
 
