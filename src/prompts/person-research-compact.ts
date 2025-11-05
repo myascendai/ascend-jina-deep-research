@@ -46,9 +46,11 @@ OUTPUT FORMAT:
 ## 7. PUBLIC VISIBILITY
 - Media, speaking, publications, awards
 
-REQUIREMENTS:
+CRITICAL REQUIREMENTS:
+- YOU MUST follow the exact 7-section format above with ## headers
+- DO NOT write a narrative essay, article, or paragraph-style response
+- Use ONLY dense bullet points, not prose
 - Include ALL URLs (especially LinkedIn)
-- Dense bullet points only
 - Cross-reference sources
 - Mark confidence levels`;
 }
