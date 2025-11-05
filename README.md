@@ -98,7 +98,7 @@ For the authentication Bearer, API key, rate limit, get from https://jina.ai/dee
 #### Client integration guidelines
 
 If you are building a web/local/mobile client that uses `Jina DeepSearch API`, here are some design guidelines:
-- Our API is fully compatible with [OpenAI API schema](https://platform.openai.com/docs/api-reference/chat/create), this should greatly simplify the integration process. The model name is `jina-deepsearch-v1`.
+- Our API is fully compatible with [OpenAI API schema](https://platform.openai.com/docs/api-reference/chat/create), this should greatly simplify the integration process. The model name is `ascend-deepsearch-v1`.
 - Our DeepSearch API is a reasoning+search grounding LLM, so it's best for questions that require deep reasoning and search.
 - Two special tokens are introduced `<think>...</think>`. Please render them with care.
 - Citations are often provided, and in [Github-flavored markdown footnote format](https://github.blog/changelog/2021-09-30-footnotes-now-supported-in-markdown-fields/), e.g. `[^1]`, `[^2]`, ...
@@ -183,7 +183,7 @@ The server will start on http://localhost:3000 with the following endpoint:
 curl http://localhost:3000/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "jina-deepsearch-v1",
+    "model": "ascend-deepsearch-v1",
     "messages": [
       {
         "role": "user",
@@ -197,7 +197,7 @@ curl http://localhost:3000/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer your_secret_token" \
   -d '{
-    "model": "jina-deepsearch-v1",
+    "model": "ascend-deepsearch-v1",
     "messages": [
       {
         "role": "user",
@@ -214,7 +214,7 @@ Response format:
   "id": "chatcmpl-123",
   "object": "chat.completion",
   "created": 1677652288,
-  "model": "jina-deepsearch-v1",
+  "model": "ascend-deepsearch-v1",
   "system_fingerprint": "fp_44709d6fcb",
   "choices": [{
     "index": 0,
@@ -239,7 +239,7 @@ For streaming responses (stream: true), the server sends chunks in this format:
   "id": "chatcmpl-123",
   "object": "chat.completion.chunk",
   "created": 1694268190,
-  "model": "jina-deepsearch-v1",
+  "model": "ascend-deepsearch-v1",
   "system_fingerprint": "fp_44709d6fcb",
   "choices": [{
     "index": 0,

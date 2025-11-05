@@ -4,6 +4,7 @@ import { SEARCH_PROVIDER, STEP_SLEEP } from "./config";
 import fs from 'fs/promises';
 import { SafeSearchType, search as duckSearch } from "duck-duck-scrape";
 import { braveSearch } from "./tools/brave-search";
+import { rapidapiGoogleSearch } from "./tools/rapidapi-google-search";
 import { rewriteQuery } from "./tools/query-rewriter";
 import { dedupQueries } from "./tools/jina-dedup";
 import { evaluateAnswer, evaluateQuestion } from "./tools/evaluator";
@@ -316,6 +317,9 @@ async function executeSearchQueries(
           break;
         case 'serper':
           results = (await serperSearch(query)).response.organic || [];
+          break;
+        case 'rapidapi':
+          results = (await rapidapiGoogleSearch(query.q, 10)).response.results || [];
           break;
         default:
           results = [];

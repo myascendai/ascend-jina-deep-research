@@ -10,5 +10,6 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - JINA_API_KEY=${JINA_API_KEY}
       - BRAVE_API_KEY=${BRAVE_API_KEY}
+      - GOOGLE_RAPIDAPI_KEY=${GOOGLE_RAPIDAPI_KEY}
     ports:
       - "3000:3000"

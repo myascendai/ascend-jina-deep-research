@@ -7,10 +7,11 @@
     "JINA_API_KEY": "",
     "BRAVE_API_KEY": "",
     "SERPER_API_KEY": "",
+    "GOOGLE_RAPIDAPI_KEY": "",
     "DEFAULT_MODEL_NAME": ""
   },
   "defaults": {
-    "search_provider": "jina",
+    "search_provider": "rapidapi",
     "llm_provider": "gemini",
     "step_sleep": 1
   },

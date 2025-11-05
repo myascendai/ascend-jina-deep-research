@@ -262,18 +262,11 @@ async function completeCurrentStreaming(
 // Models API endpoints
 app.get('/v1/models', (async (_req: Request, res: Response) => {
   const models: Model[] = [{
-    id: 'jina-deepsearch-v1',
+    id: 'ascend-deepsearch-v1',
     object: 'model',
     created: 1686935002,
     owned_by: 'jina-ai'
-  },
-  {
-    id: 'jina-deepsearch-v2',
-    object: 'model',
-    created: 1717987200,
-    owned_by: 'jina-ai'
-  }
-  ];
+  }];
 
   res.json({
     object: 'list',
@@ -284,18 +277,11 @@ app.get('/v1/models', (async (_req: Request, res: Response) => {
 app.get('/v1/models/:model', (async (req: Request, res: Response) => {
   const modelId = req.params.model;
 
-  if (modelId === 'jina-deepsearch-v1') {
+  if (modelId === 'ascend-deepsearch-v1') {
     res.json({
-      id: 'jina-deepsearch-v1',
+      id: 'ascend-deepsearch-v1',
       object: 'model',
       created: 1686935002,
-      owned_by: 'jina-ai'
-    });
-  } else if (modelId === 'jina-deepsearch-v2') {
-    res.json({
-      id: 'jina-deepsearch-v2',
-      object: 'model',
-      created: 1717987200,
       owned_by: 'jina-ai'
     });
   } else {
@@ -743,6 +729,13 @@ app.post('/v1/chat/completions', validationRules, (async (req: Request, res: Res
         visitedURLs,
         readURLs,
         numURLs: allURLs.length,
+      });
+
+      logDebug('[chat/completions] Final answer preview:', {
+        answerLength: finalAnswer?.length || 0,
+        answerPreview: finalAnswer?.substring(0, 200) || 'EMPTY',
+        hasAnnotations: !!annotations,
+        annotationsCount: annotations?.length || 0
       });
 
       res.json(response);
