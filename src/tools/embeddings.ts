@@ -4,8 +4,14 @@ import axiosClient from "../utils/axios-client";
 import { logError, logDebug, logWarning } from '../logging';
 
 const BATCH_SIZE = 32;
-const API_URL = "https://api.jina.ai/v1/embeddings";
 const MAX_RETRIES = 3; // Maximum number of retries for missing embeddings
+
+// Embedding provider configuration
+const EMBEDDING_PROVIDER = process.env.EMBEDDING_PROVIDER || 'jina';
+const EMBEDDING_MODEL = process.env.EMBEDDING_MODEL;
+const DEEP_INFRA_API_KEY = process.env.DEEP_INFRA_API_KEY;
+const JINA_API_URL = "https://api.jina.ai/v1/embeddings";
+const DEEP_INFRA_API_URL = "https://api.deepinfra.com/v1/openai/embeddings";
 
 // Modified to support different embedding tasks and dimensions
 export async function getEmbeddings(
@@ -21,8 +27,12 @@ export async function getEmbeddings(
 ): Promise<{ embeddings: number[][], tokens: number }> {
   logDebug(`[embeddings] Getting embeddings for ${texts.length} texts`);
 
-  if (!JINA_API_KEY) {
+  // Validate API keys based on provider
+  if (EMBEDDING_PROVIDER === 'jina' && !JINA_API_KEY) {
     throw new Error('JINA_API_KEY is not set');
+  }
+  if (EMBEDDING_PROVIDER === 'deepinfra' && !DEEP_INFRA_API_KEY) {
+    throw new Error('DEEP_INFRA_API_KEY is not set');
   }
 
   // Handle empty input case
@@ -98,29 +108,51 @@ async function getBatchEmbeddingsWithRetry(
   });
 
   while (textsToProcess.length > 0 && retryCount < MAX_RETRIES) {
-    const request: JinaEmbeddingRequest = {
-      model: options.model || "jina-embeddings-v3",
-      input: textsToProcess as any,
-    };
+    let apiUrl: string;
+    let apiKey: string;
+    let request: any;
 
-    if (request.model === "jina-embeddings-v3") {
-      request.task = options.task || "text-matching";
-      request.truncate = true;
+    if (EMBEDDING_PROVIDER === 'deepinfra') {
+      // Deep Infra configuration (OpenAI-compatible)
+      apiUrl = DEEP_INFRA_API_URL;
+      apiKey = DEEP_INFRA_API_KEY!;
+
+      request = {
+        model: options.model || EMBEDDING_MODEL || "BAAI/bge-m3",
+        input: textsToProcess.map(item =>
+          typeof item === 'string' ? item : Object.values(item)[0]
+        ),
+        encoding_format: "float"
+      };
+    } else {
+      // Jina configuration (default)
+      apiUrl = JINA_API_URL;
+      apiKey = JINA_API_KEY!;
+
+      request = {
+        model: options.model || "jina-embeddings-v3",
+        input: textsToProcess as any,
+      };
+
+      if (request.model === "jina-embeddings-v3") {
+        request.task = options.task || "text-matching";
+        request.truncate = true;
+      }
+
+      // Add optional parameters if provided
+      if (options.dimensions) request.dimensions = options.dimensions;
+      if (options.late_chunking) request.late_chunking = options.late_chunking;
+      if (options.embedding_type) request.embedding_type = options.embedding_type;
     }
-
-    // Add optional parameters if provided
-    if (options.dimensions) request.dimensions = options.dimensions;
-    if (options.late_chunking) request.late_chunking = options.late_chunking;
-    if (options.embedding_type) request.embedding_type = options.embedding_type;
 
     try {
       const response = await axiosClient.post<JinaEmbeddingResponse>(
-        API_URL,
+        apiUrl,
         request,
         {
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${JINA_API_KEY}`
+            "Authorization": `Bearer ${apiKey}`
           },
         },
       );
