@@ -3,7 +3,12 @@ import { JINA_API_KEY } from "../config";
 import axiosClient from '../utils/axios-client';
 import { logInfo, logError, logDebug, logWarning } from '../logging';
 
+// Reranker provider configuration
+const RERANK_PROVIDER = process.env.RERANK_PROVIDER || 'jina';
+const RERANK_MODEL = process.env.RERANK_MODEL;
+const DEEP_INFRA_API_KEY = process.env.DEEP_INFRA_API_KEY;
 const JINA_API_URL = 'https://api.jina.ai/v1/rerank';
+const DEEP_INFRA_RERANK_URL = 'https://api.deepinfra.com/v1/inference/rerank';
 
 // Types for Jina Rerank API
 interface JinaRerankRequest {
@@ -34,8 +39,12 @@ export async function rerankDocuments(
   batchSize = 2000
 ): Promise<{ results: Array<{ index: number, relevance_score: number, document: { text: string } }> }> {
   try {
-    if (!JINA_API_KEY) {
+    // Validate API keys based on provider
+    if (RERANK_PROVIDER === 'jina' && !JINA_API_KEY) {
       throw new Error('JINA_API_KEY is not set');
+    }
+    if (RERANK_PROVIDER === 'deepinfra' && !DEEP_INFRA_API_KEY) {
+      throw new Error('DEEP_INFRA_API_KEY is not set');
     }
 
     // No need to slice - we'll process all documents in batches
@@ -51,20 +60,42 @@ export async function rerankDocuments(
       batches.map(async (batchDocuments, batchIndex) => {
         const startIdx = batchIndex * batchSize;
 
-        const request: JinaRerankRequest = {
-          model: 'jina-reranker-v2-base-multilingual',
-          query,
-          top_n: batchDocuments.length,
-          documents: batchDocuments
-        };
+        let apiUrl: string;
+        let apiKey: string;
+        let request: any;
+
+        if (RERANK_PROVIDER === 'deepinfra') {
+          // Deep Infra configuration
+          apiUrl = DEEP_INFRA_RERANK_URL;
+          apiKey = DEEP_INFRA_API_KEY!;
+
+          request = {
+            model: RERANK_MODEL || 'Qwen/Qwen3-Reranker-0.6B',
+            query,
+            documents: batchDocuments,
+            top_n: batchDocuments.length,
+            return_documents: true
+          };
+        } else {
+          // Jina configuration (default)
+          apiUrl = JINA_API_URL;
+          apiKey = JINA_API_KEY!;
+
+          request = {
+            model: 'jina-reranker-v2-base-multilingual',
+            query,
+            top_n: batchDocuments.length,
+            documents: batchDocuments
+          };
+        }
 
         const response = await axiosClient.post<JinaRerankResponse>(
-          JINA_API_URL,
+          apiUrl,
           request,
           {
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${JINA_API_KEY}`
+              'Authorization': `Bearer ${apiKey}`
             }
           }
         );
