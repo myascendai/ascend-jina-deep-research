@@ -22,8 +22,8 @@ import { buildPersonResearchPrompt } from './prompts/person-research';
 
 const app = express();
 
-// Get secret from command line args for optional authentication
-const secret = process.argv.find(arg => arg.startsWith('--secret='))?.split('=')[1];
+// API Key authentication configuration
+const secret = process.env.ASCEND_SECRET;
 
 
 app.use(cors());
