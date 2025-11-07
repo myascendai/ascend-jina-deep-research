@@ -304,7 +304,7 @@ if (secret) {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ') || authHeader.split(' ')[1] !== secret) {
       logError('Unauthorized request');
-      res.status(401).json({ error: 'Unauthorized. Please provide a valid Jina API key.' });
+      res.status(401).json({ error: 'Unauthorized. Please provide a valid Ascend API key.' });
       return;
     }
 
@@ -391,7 +391,7 @@ app.post('/v1/chat/completions', validationRules, (async (req: Request, res: Res
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ') || authHeader.split(' ')[1] !== secret) {
       logError('Unauthorized request');
-      res.status(401).json({ error: 'Unauthorized. Please provide a valid Jina API key.' });
+      res.status(401).json({ error: 'Unauthorized. Please provide a valid Ascend API key.' });
       return;
     }
   }
