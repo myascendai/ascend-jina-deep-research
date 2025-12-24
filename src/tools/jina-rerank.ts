@@ -8,7 +8,8 @@ const RERANK_PROVIDER = process.env.RERANK_PROVIDER || 'jina';
 const RERANK_MODEL = process.env.RERANK_MODEL;
 const DEEP_INFRA_API_KEY = process.env.DEEP_INFRA_API_KEY;
 const JINA_API_URL = 'https://api.jina.ai/v1/rerank';
-const DEEP_INFRA_RERANK_URL = 'https://api.deepinfra.com/v1/inference/rerank';
+const DEEP_INFRA_BASE_URL = 'https://api.deepinfra.com/v1/inference';
+const DEFAULT_DEEP_INFRA_RERANK_MODEL = 'Qwen/Qwen3-Reranker-0.6B';
 
 // Types for Jina Rerank API
 interface JinaRerankRequest {
@@ -30,6 +31,11 @@ interface JinaRerankResponse {
   usage: {
     total_tokens: number;
   };
+}
+
+// DeepInfra returns scores array (one array per query)
+interface DeepInfraRerankResponse {
+  scores: number[][]; // scores[queryIndex][docIndex]
 }
 
 export async function rerankDocuments(
@@ -65,16 +71,15 @@ export async function rerankDocuments(
         let request: any;
 
         if (RERANK_PROVIDER === 'deepinfra') {
-          // Deep Infra configuration
-          apiUrl = DEEP_INFRA_RERANK_URL;
+          // Deep Infra configuration - URL format: https://api.deepinfra.com/v1/inference/{model}
+          const deepInfraModel = RERANK_MODEL || DEFAULT_DEEP_INFRA_RERANK_MODEL;
+          apiUrl = `${DEEP_INFRA_BASE_URL}/${deepInfraModel}`;
           apiKey = DEEP_INFRA_API_KEY!;
 
+          // DeepInfra uses 'queries' (array) instead of 'query' (string)
           request = {
-            model: RERANK_MODEL || 'Qwen/Qwen3-Reranker-0.6B',
-            query,
+            queries: [query],
             documents: batchDocuments,
-            top_n: batchDocuments.length,
-            return_documents: true
           };
         } else {
           // Jina configuration (default)
@@ -89,7 +94,7 @@ export async function rerankDocuments(
           };
         }
 
-        const response = await axiosClient.post<JinaRerankResponse>(
+        const response = await axiosClient.post<JinaRerankResponse | DeepInfraRerankResponse>(
           apiUrl,
           request,
           {
@@ -100,18 +105,38 @@ export async function rerankDocuments(
           }
         );
 
-        // Track token usage from this batch
-        (tracker || new TokenTracker()).trackUsage('rerank', {
-          promptTokens: response.data.usage.total_tokens,
-          completionTokens: 0,
-          totalTokens: response.data.usage.total_tokens
-        });
+        // Handle different response formats
+        if (RERANK_PROVIDER === 'deepinfra') {
+          // DeepInfra returns { scores: [[score1, score2, ...]] } for single query
+          const deepInfraResponse = response.data as DeepInfraRerankResponse;
+          const scores = deepInfraResponse.scores[0] || []; // First query's scores
 
-        // Add the original document index to each result
-        return response.data.results.map(result => ({
-          ...result,
-          originalIndex: startIdx + result.index // Map back to the original index
-        }));
+          // Convert to unified format
+          return scores.map((score, idx) => ({
+            index: idx,
+            relevance_score: score,
+            document: { text: batchDocuments[idx] },
+            originalIndex: startIdx + idx
+          }));
+        } else {
+          // Jina format
+          const jinaResponse = response.data as JinaRerankResponse;
+
+          // Track token usage from this batch (Jina provides usage info)
+          if (jinaResponse.usage) {
+            (tracker || new TokenTracker()).trackUsage('rerank', {
+              promptTokens: jinaResponse.usage.total_tokens,
+              completionTokens: 0,
+              totalTokens: jinaResponse.usage.total_tokens
+            });
+          }
+
+          // Add the original document index to each result
+          return jinaResponse.results.map(result => ({
+            ...result,
+            originalIndex: startIdx + result.index // Map back to the original index
+          }));
+        }
       })
     );
 
