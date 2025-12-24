@@ -7,7 +7,7 @@ import {
   Schema
 } from "ai";
 import { TokenTracker } from "./token-tracker";
-import { getModel, ToolName, getToolConfig } from "../config";
+import { getModel, ToolName, getToolConfig, LLMProvider } from "../config";
 import Hjson from 'hjson'; // Import Hjson library
 import { logError, logDebug, logWarning } from '../logging';
 
@@ -27,9 +27,13 @@ interface GenerateOptions<T> {
 
 export class ObjectGeneratorSafe {
   private tokenTracker: TokenTracker;
+  private modelOverride?: string;
+  private providerOverride?: LLMProvider;
 
-  constructor(tokenTracker?: TokenTracker) {
+  constructor(tokenTracker?: TokenTracker, modelOverride?: string, providerOverride?: LLMProvider) {
     this.tokenTracker = tokenTracker || new TokenTracker();
+    this.modelOverride = modelOverride;
+    this.providerOverride = providerOverride;
   }
 
   /**
@@ -147,7 +151,7 @@ export class ObjectGeneratorSafe {
     try {
       // Primary attempt with main model
       const result = await generateObject({
-        model: getModel(model),
+        model: getModel(model, this.modelOverride, this.providerOverride),
         schema,
         prompt,
         system,

@@ -19,6 +19,7 @@ import { logInfo, logError, logDebug, logWarning } from './logging';
 import { body, validationResult } from 'express-validator';
 import { buildCompactPersonResearchPrompt } from './prompts/person-research-compact';
 import { buildPersonResearchPrompt } from './prompts/person-research';
+import { ProviderConfigError } from './config';
 
 const app = express();
 
@@ -661,7 +662,9 @@ app.post('/v1/chat/completions', validationRules, (async (req: Request, res: Res
       body.search_language_code,
       body.search_provider,
       body.with_images,
-      body.team_size
+      body.team_size,
+      body.llm_model,
+      body.llm_provider
     )
     let finalAnswer = (finalStep as AnswerAction).mdAnswer;
 
@@ -809,8 +812,15 @@ app.post('/v1/chat/completions', validationRules, (async (req: Request, res: Res
       stack: error instanceof Error ? error.stack : undefined
     });
 
-    // Track error as rejected tokens with Vercel token counting
-    const errorMessage = error?.message || 'An error occurred';
+    // Build detailed error response
+    let errorMessage = error?.message || 'An error occurred';
+    let errorDetails: any = undefined;
+
+    // Check if it's a provider configuration error
+    if (error instanceof ProviderConfigError) {
+      errorDetails = error.toJSON();
+      logError('[chat/completions] Provider config error:', errorDetails);
+    }
 
     // Clean up event listeners
     context.actionTracker.removeAllListeners('action');
@@ -846,7 +856,10 @@ app.post('/v1/chat/completions', validationRules, (async (req: Request, res: Res
         system_fingerprint: 'fp_' + requestId,
         choices: [{
           index: 0,
-          delta: { content: errorMessage, type: 'error' },
+          delta: {
+            content: errorDetails ? JSON.stringify(errorDetails) : errorMessage,
+            type: 'error'
+          },
           logprobs: null,
           finish_reason: 'error'
         }],
@@ -866,15 +879,17 @@ app.post('/v1/chat/completions', validationRules, (async (req: Request, res: Res
           index: 0,
           message: {
             role: 'assistant',
-            content: `Error: ${errorMessage}`,
+            content: errorDetails ? JSON.stringify(errorDetails, null, 2) : `Error: ${errorMessage}`,
             type: 'error'
           },
           logprobs: null,
           finish_reason: 'error'
         }],
         usage,
+        // Include error details at top level for easier parsing
+        ...(errorDetails && { error: errorDetails }),
       };
-      res.json(response);
+      res.status(error instanceof ProviderConfigError ? 400 : 500).json(response);
     }
   }
 }) as RequestHandler);

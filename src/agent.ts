@@ -1,6 +1,6 @@
 import { ZodObject } from 'zod';
 import { CoreMessage } from 'ai';
-import { SEARCH_PROVIDER, STEP_SLEEP } from "./config";
+import { SEARCH_PROVIDER, STEP_SLEEP, LLMProvider } from "./config";
 import fs from 'fs/promises';
 import { SafeSearchType, search as duckSearch } from "duck-duck-scrape";
 import { braveSearch } from "./tools/brave-search";
@@ -437,7 +437,9 @@ export async function getResponse(question?: string,
   searchLanguageCode?: string,
   searchProvider?: string,
   withImages: boolean = false,
-  teamSize: number = 1
+  teamSize: number = 1,
+  llmModel?: string,
+  llmProvider?: LLMProvider
 ): Promise<{ result: StepAction; context: TrackerContext; visitedURLs: string[], readURLs: string[], allURLs: string[], imageReferences?: ImageReference[], searchCount: number, readerCount: number }> {
 
   let step = 0;
@@ -475,7 +477,7 @@ export async function getResponse(question?: string,
     actionTracker: existingContext?.actionTracker || new ActionTracker()
   };
 
-  const generator = new ObjectGeneratorSafe(context.tokenTracker);
+  const generator = new ObjectGeneratorSafe(context.tokenTracker, llmModel, llmProvider);
 
   let schema: ZodObject<any> = SchemaGen.getAgentSchema(true, true, true, true, true)
   const gaps: string[] = [question];  // All questions to be answered including the orginal question
@@ -845,7 +847,7 @@ But then you realized you have asked them before. You decided to to think out of
             badHostnames,
             onlyHostnames,
             maxRef,
-            minRelScore, languageCode, searchLanguageCode, searchProvider, withImages, 1)));
+            minRelScore, languageCode, searchLanguageCode, searchProvider, withImages, 1, llmModel, llmProvider)));
           // convert current step to AnswerAction
           thisStep = {
             action: 'answer',

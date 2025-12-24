@@ -68,16 +68,32 @@ It is also available on npm but not recommended for now, as the code is still un
 
 ## Usage
 
-We use Gemini (latest `gemini-2.0-flash`) / OpenAI / [LocalLLM](#use-local-llm) for reasoning, [Jina Reader](https://jina.ai/reader) for searching and reading webpages, you can get a free API key with 1M tokens from jina.ai. 
+We support multiple LLM providers for reasoning: **Gemini**, **OpenAI**, **Anthropic**, **Groq**, and [LocalLLM](#use-local-llm). We use [Jina Reader](https://jina.ai/reader) for searching and reading webpages - you can get a free API key with 1M tokens from jina.ai.
 
 ```bash
-export GEMINI_API_KEY=...  # for gemini
-# export OPENAI_API_KEY=... # for openai
-# export LLM_PROVIDER=openai # for openai
+# Required: Jina API key for search/read
 export JINA_API_KEY=jina_...  # free jina api key, get from https://jina.ai/reader
+
+# Choose your LLM provider (default: gemini)
+export LLM_PROVIDER=gemini  # options: gemini, openai, anthropic, groq
+
+# Set the API key for your chosen provider
+export GEMINI_API_KEY=...     # for gemini (default)
+# export OPENAI_API_KEY=...   # for openai
+# export ANTHROPIC_API_KEY=... # for anthropic
+# export GROQ_API_KEY=...     # for groq
 
 npm run dev $QUERY
 ```
+
+### Supported LLM Providers
+
+| Provider | Default Model | Environment Variable |
+|----------|---------------|---------------------|
+| Gemini (default) | `gemini-2.5-flash-lite` | `GEMINI_API_KEY` |
+| OpenAI | `gpt-4o-mini` | `OPENAI_API_KEY` |
+| Anthropic | `claude-sonnet-4-20250514` | `ANTHROPIC_API_KEY` |
+| Groq | `llama-3.3-70b-versatile` | `GROQ_API_KEY` |
 
 ### Official Site
 
@@ -208,6 +224,38 @@ curl http://localhost:3000/v1/chat/completions \
   }'
 ```
 
+### API Parameters
+
+The API supports the following additional parameters beyond the standard OpenAI schema:
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `llm_provider` | string | Override the default LLM provider at runtime. Options: `gemini`, `openai`, `anthropic`, `groq`, `vertex` |
+| `llm_model` | string | Override the default model for the selected provider (e.g., `gemini-2.5-pro`, `gpt-4o`, `claude-sonnet-4-20250514`) |
+| `reasoning_effort` | string | Control search depth: `low` (75k tokens), `medium` (500k tokens), `high` (1M tokens) |
+| `budget_tokens` | number | Set exact token budget for the research |
+| `max_attempts` | number | Maximum retry attempts for answer evaluation |
+| `boost_hostnames` | string[] | Prioritize results from these domains |
+| `bad_hostnames` | string[] | Exclude results from these domains |
+| `only_hostnames` | string[] | Only search within these domains |
+| `no_direct_answer` | boolean | Force research even for simple questions |
+| `with_images` | boolean | Include relevant images in the response |
+| `language_code` | string | Language for the response |
+| `search_language_code` | string | Language for search queries |
+
+**Example with runtime provider override:**
+```bash
+curl http://localhost:3000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "ascend-deepsearch-v1",
+    "messages": [{"role": "user", "content": "What is quantum computing?"}],
+    "llm_provider": "anthropic",
+    "llm_model": "claude-sonnet-4-20250514",
+    "reasoning_effort": "medium"
+  }'
+```
+
 Response format:
 ```json
 {
@@ -229,6 +277,31 @@ Response format:
     "prompt_tokens": 9,
     "completion_tokens": 12,
     "total_tokens": 21
+  }
+}
+```
+
+### Error Handling
+
+When there's a configuration error (e.g., missing API key for a provider), the API returns a detailed error response:
+
+```json
+{
+  "choices": [{
+    "message": {
+      "role": "assistant",
+      "content": "{...error details...}",
+      "type": "error"
+    },
+    "finish_reason": "error"
+  }],
+  "error": {
+    "error": "ProviderConfigError",
+    "code": "MISSING_API_KEY",
+    "message": "ANTHROPIC_API_KEY environment variable is not set...",
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-20250514",
+    "availableProviders": ["gemini", "openai", "anthropic", "groq", "vertex"]
   }
 }
 ```

@@ -259,6 +259,12 @@ export interface ChatCompletionRequest {
   reasoning_effort?: 'low' | 'medium' | 'high';
   max_completion_tokens?: number;
 
+  // Override the default LLM model (e.g., "gemini-2.5-flash", "gemini-2.5-pro", "gpt-4o")
+  llm_model?: string;
+
+  // Override the default LLM provider (e.g., "gemini", "openai", "anthropic", "groq")
+  llm_provider?: 'openai' | 'gemini' | 'vertex' | 'anthropic' | 'groq';
+
   budget_tokens?: number;
   max_attempts?: number;
 
