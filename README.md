@@ -1,5 +1,8 @@
 # DeepResearch
 
+> [!NOTE]
+> This repository is included as a submodule in the [Ascend Groups monorepo](https://github.com/myascendai/ascend-groups) at `apps/ascend-jina-deep-research/`.
+
 [Official UI](https://search.jina.ai/) | [UI Code](https://github.com/jina-ai/deepsearch-ui) | [Stable API](https://jina.ai/deepsearch) | [Blog](https://jina.ai/news/a-practical-guide-to-implementing-deepsearch-deepresearch)
 
 Keep searching, reading webpages, reasoning until an answer is found (or the token budget is exceeded). Useful for deeply investigating a query.
