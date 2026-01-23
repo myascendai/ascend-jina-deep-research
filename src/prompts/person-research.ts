@@ -5,9 +5,55 @@
  * It can be customized by replacing {name} and {known_info} placeholders.
  */
 
-export function buildPersonResearchPrompt(personName: string, knownInfo?: string): string {
-  return `You are a professional OSINT (Open Source Intelligence) researcher specializing in comprehensive person background investigations. Your task is to conduct systematic, broad-spectrum research to establish a complete foundational profile.
+export interface PersonIdentifiers {
+  linkedinId?: string;
+  company?: string;
+  title?: string;
+  location?: string;
+}
 
+export function buildPersonResearchPrompt(
+  personName: string,
+  knownInfo?: string,
+  identifiers?: PersonIdentifiers
+): string {
+  // Build identity constraint section if LinkedIn ID is available
+  const identityConstraint = identifiers?.linkedinId
+    ? `
+# CRITICAL IDENTITY CONSTRAINT
+You MUST verify all information against this specific LinkedIn profile: linkedin.com/in/${identifiers.linkedinId}
+Any information that CANNOT be verified as belonging to this specific LinkedIn profile should be EXCLUDED from the report.
+This is the primary source of truth for identity verification.
+`
+    : '';
+
+  // Build disambiguation warning section
+  const disambiguationWarning = `
+# NAME DISAMBIGUATION WARNING
+"${personName}" may be a common name. Multiple people may exist with this name in search results.
+
+You MUST verify that ALL information in this report belongs to the SPECIFIC person defined by:
+- **Company**: ${identifiers?.company || 'Unknown - use other identifiers'}
+- **Title**: ${identifiers?.title || 'Unknown - use other identifiers'}
+- **Location**: ${identifiers?.location || 'Unknown - use other identifiers'}
+
+## MANDATORY EXCLUSION RULES:
+REJECT and EXCLUDE any information that appears to be about a DIFFERENT "${personName}". Key indicators of identity mix-up:
+- Different current company than specified above
+- Different geographic location that conflicts with known location
+- Conflicting career timeline or progression that cannot be reconciled
+- Different industry or field that doesn't match known professional context
+- Biographical details that contradict verified information
+
+## DISAMBIGUATION REPORTING:
+In the Identity Confirmation section, you MUST report:
+- Whether multiple people named "${personName}" were found
+- What information was EXCLUDED due to potential mix-up
+- Your confidence level that ALL included information belongs to the correct person
+`;
+
+  return `You are a professional OSINT (Open Source Intelligence) researcher specializing in comprehensive person background investigations. Your task is to conduct systematic, broad-spectrum research to establish a complete foundational profile.
+${identityConstraint}${disambiguationWarning}
 # RESEARCH OBJECTIVES
 
 Gather accessible information across all major life domains to create a solid baseline profile of ${personName}. Focus on:
