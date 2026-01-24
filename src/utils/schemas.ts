@@ -4,7 +4,7 @@ import { EvaluationType, PromptPair } from "../types";
 import { logDebug } from '../logging';
 
 export const MAX_URLS_PER_STEP = 2      // Reduced to save API calls
-export const MAX_QUERIES_PER_STEP = 2   // Reduced to save RapidAPI quota
+export const MAX_QUERIES_PER_STEP = 4   // Match 4 cognitive personas for person research
 export const MAX_REFLECT_PER_STEP = 2
 export const MAX_CLUSTERS = 2           // Reduced to match queries
 

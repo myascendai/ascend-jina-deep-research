@@ -31,17 +31,14 @@ Map each query through ALL these layers, especially focusing on uncovering Shado
 </intent-mining>
 
 <cognitive-personas>
-Generate ONE optimized query from each of these cognitive perspectives:
+Generate ONE optimized query from each of these 4 cognitive perspectives (optimized for person/OSINT research):
 
-1. Expert Skeptic: Focus on edge cases, limitations, counter-evidence, and potential failures. Generate a query that challenges mainstream assumptions and looks for exceptions.
-2. Detail Analyst: Obsess over precise specifications, technical details, and exact parameters. Generate a query that drills into granular aspects and seeks definitive reference data.
-3. Historical Researcher: Examine how the subject has evolved over time, previous iterations, and historical context. Generate a query that tracks changes, development history, and legacy issues.
-4. Comparative Thinker: Explore alternatives, competitors, contrasts, and trade-offs. Generate a query that sets up comparisons and evaluates relative advantages/disadvantages.
-5. Temporal Context: Add a time-sensitive query that incorporates the current date (${currentYear}-${currentMonth}) to ensure recency and freshness of information.
-6. Globalizer: Identify the most authoritative language/region for the subject matter (not just the query's origin language). For example, use German for BMW (German company), English for tech topics, Japanese for anime, Italian for cuisine, etc. Generate a search in that language to access native expertise.
-7. Reality-Hater-Skepticalist: Actively seek out contradicting evidence to the original query. Generate a search that attempts to disprove assumptions, find contrary evidence, and explore "Why is X false?" or "Evidence against X" perspectives.
+1. Temporal Context: Add a time-sensitive query that incorporates the current date (${currentYear}-${currentMonth}) to ensure recency and freshness of information. For person research, focus on recent news, current position, latest activities.
+2. Detail Analyst: Obsess over precise specifications, technical details, and exact parameters. For person research, focus on specific facts like LinkedIn profile, credentials, education, job titles, company affiliations.
+3. Historical Researcher: Examine how the subject has evolved over time, previous iterations, and historical context. For person research, focus on career timeline, past employers, previous positions, professional progression.
+4. Globalizer: Identify the most authoritative language/region for the subject matter. For person research, search in the person's native language or the language of their primary market to access local news and information.
 
-Ensure each persona contributes exactly ONE high-quality query that follows the schema format. These 7 queries will be combined into a final array.
+Ensure each persona contributes exactly ONE high-quality query that follows the schema format. These 4 queries will be combined into a final array.
 </cognitive-personas>
 
 <rules>
@@ -72,112 +69,73 @@ Note: A query can't only have operators; and operators can't be at the start of 
 
 <examples>
 <example-1>
-Input Query: 宝马二手车价格
+Input Query: Meg Fasy EventsGIG founder
 <think>
-宝马二手车价格...哎，这人应该是想买二手宝马吧。表面上是查价格，实际上肯定是想买又怕踩坑。谁不想开个宝马啊，面子十足，但又担心养不起。这年头，开什么车都是身份的象征，尤其是宝马这种豪车，一看就是有点成绩的人。但很多人其实囊中羞涩，硬撑着买了宝马，结果每天都在纠结油费保养费。说到底，可能就是想通过物质来获得安全感或填补内心的某种空虚吧。
+Meg Fasy EventsGIG founder...这是在调查一个人物。需要了解她的最新动态、具体背景信息、职业历史，以及用当地语言搜索更多信息。EventsGIG看起来是个活动行业的公司，Meg Fasy应该是创始人。需要找到她的LinkedIn、过往工作经历、最近的新闻报道等。
 
-要帮他的话，得多方位思考一下...二手宝马肯定有不少问题，尤其是那些车主不会主动告诉你的隐患，维修起来可能要命。不同系列的宝马价格差异也挺大的，得看看详细数据和实际公里数。价格这东西也一直在变，去年的行情和今年的可不一样，${currentYear}年最新的趋势怎么样？宝马和奔驰还有一些更平价的车比起来，到底值不值这个钱？宝马是德国车，德国人对这车的了解肯定最深，德国车主的真实评价会更有参考价值。最后，现实点看，肯定有人买了宝马后悔的，那些血泪教训不能不听啊，得找找那些真实案例。
+从四个角度来搜索：最近的新闻和动态、具体的职位和公司信息、职业发展历程、以及英文本地搜索获取更多细节。
 </think>
 queries: [
   {
-    "q": "二手宝马 维修噩梦 隐藏缺陷"
-  },
-  {
-    "q": "宝马各系价格区间 里程对比"
-  },
-  {
-    "tbs": "qdr:y",
-    "q": "二手宝马价格趋势"
-  },
-  {
-    "q": "二手宝马vs奔驰vs奥迪 性价比"
-  },
-  {
     "tbs": "qdr:m",
-    "q": "宝马行情"
+    "q": "Meg Fasy EventsGIG news"
   },
   {
-    "q": "BMW Gebrauchtwagen Probleme"
+    "q": "Meg Fasy LinkedIn EventsGIG founder CEO"
   },
   {
-    "q": "二手宝马后悔案例 最差投资"
+    "q": "Meg Fasy career history previous companies"
+  },
+  {
+    "q": "Meg Fasy FazeFWD sponsorship events industry"
   }
 ]
 </example-1>
 
 <example-2>
-Input Query: sustainable regenerative agriculture soil health restoration techniques
+Input Query: 张三 阿里巴巴 产品经理
 <think>
-Sustainable regenerative agriculture soil health restoration techniques... interesting search. They're probably looking to fix depleted soil on their farm or garden. Behind this search though, there's likely a whole story - someone who's read books like "The Soil Will Save Us" or watched documentaries on Netflix about how conventional farming is killing the planet. They're probably anxious about climate change and want to feel like they're part of the solution, not the problem. Might be someone who brings up soil carbon sequestration at dinner parties too, you know the type. They see themselves as an enlightened land steward, rejecting the ways of "Big Ag." Though I wonder if they're actually implementing anything or just going down research rabbit holes while their garden sits untouched.
+张三 阿里巴巴 产品经理...这是在调查一个中国科技公司的产品经理。需要找到他的最新动态、LinkedIn或脉脉资料、过往工作经历，以及中文搜索获取更多本地信息。
 
-Let me think about this from different angles... There's always a gap between theory and practice with these regenerative methods - what failures and limitations are people not talking about? And what about the hardcore science - like actual measurable fungi-to-bacteria ratios and carbon sequestration rates? I bet there's wisdom in indigenous practices too - Aboriginal fire management techniques predate all our "innovative" methods by thousands of years. Anyone serious would want to know which techniques work best in which contexts - no-till versus biochar versus compost tea and all that. ${currentYear}'s research would be most relevant, especially those university field trials on soil inoculants. The Austrians have been doing this in the Alps forever, so their German-language resources probably have techniques that haven't made it to English yet. And let's be honest, someone should challenge whether all the regenerative ag hype can actually scale to feed everyone.
+四个角度：最近的职位变动或新闻、具体的职业信息和社交媒体、职业发展历程、以及中文搜索获取国内平台信息。
 </think>
 queries: [
   {
-    "tbs": "qdr:y",
-    "location": "Fort Collins",
-    "q": "regenerative agriculture soil failures limitations"
-  },
-  {
-    "location": "Ithaca",
-    "q": "mycorrhizal fungi quantitative sequestration metrics"
-  },
-  {
-    "tbs": "qdr:y",
-    "location": "Perth",
-    "q": "aboriginal firestick farming soil restoration"
-  },
-  {
-    "location": "Totnes",
-    "q": "comparison no-till vs biochar vs compost tea"
-  },
-  {
     "tbs": "qdr:m",
-    "location": "Davis",
-    "q": "soil microbial inoculants research trials"
+    "q": "张三 阿里巴巴 最新动态"
   },
   {
-    "location": "Graz",
-    "q": "Humusaufbau Alpenregion Techniken"
+    "q": "张三 阿里巴巴 产品经理 LinkedIn 脉脉"
   },
   {
-    "tbs": "qdr:m",
-    "location": "Guelph",
-    "q": "regenerative agriculture exaggerated claims evidence"
+    "q": "张三 阿里巴巴 职业经历 前公司"
+  },
+  {
+    "q": "Zhang San Alibaba product manager profile"
   }
 ]
 </example-2>
 
 <example-3>
-Input Query: KIリテラシー向上させる方法
+Input Query: 田中太郎 ソニー エンジニア
 <think>
-AIリテラシー向上させる方法か...なるほど。最近AIがどんどん話題になってきて、ついていけなくなる不安があるんだろうな。表面的には単にAIの知識を増やしたいってことだけど、本音を言えば、職場でAIツールをうまく使いこなして一目置かれたいんじゃないかな。周りは「ChatGPTでこんなことができる」とか言ってるのに、自分だけ置いてけぼりになるのが怖いんだろう。案外、基本的なAIの知識がなくて、それをみんなに知られたくないという気持ちもあるかも。根っこのところでは、技術の波に飲み込まれる恐怖感があるんだよな、わかるよその気持ち。
+田中太郎 ソニー エンジニア...日本の大手企業のエンジニアを調査している。最新の動向、LinkedIn や職務経歴、過去のキャリア、そして日本語での詳細情報を探す必要がある。
 
-いろんな視点で考えてみよう...AIって実際どこまでできるんだろう？宣伝文句と実際の能力にはかなりギャップがありそうだし、その限界を知ることも大事だよね。あと、AIリテラシーって言っても、どう学べばいいのか体系的に整理されてるのかな？過去の「AI革命」とかって結局どうなったんだろう。バブルが弾けて終わったものもあるし、その教訓から学べることもあるはず。プログラミングと違ってAIリテラシーって何なのかもはっきりさせたいよね。批判的思考力との関係も気になる。${currentYear}年のAIトレンドは特に変化が速そうだから、最新情報を押さえておくべきだな。海外の方が進んでるから、英語の資料も見た方がいいかもしれないし。そもそもAIリテラシーを身につける必要があるのか？「流行りだから」という理由だけなら、実は意味がないかもしれないよね。
+四つの視点から検索：最近のニュースや活動、具体的なプロフィール情報、キャリア履歴、そして英語での国際的な情報。
 </think>
 queries: [
   {
-    "q": "AI技術 限界 誇大宣伝"
-  },
-  {
-    "q": "AIリテラシー 学習ステップ 体系化"
-  },
-  {
-    "tbs": "qdr:y",
-    "q": "AI歴史 失敗事例 教訓"
-  },
-  {
-    "q": "AIリテラシー vs プログラミング vs 批判思考"
-  },
-  {
     "tbs": "qdr:m",
-    "q": "AI最新トレンド 必須スキル"
+    "q": "田中太郎 ソニー 最新ニュース"
   },
   {
-    "q": "artificial intelligence literacy fundamentals"
+    "q": "田中太郎 ソニー エンジニア LinkedIn プロフィール"
   },
   {
-    "q": "AIリテラシー向上 無意味 理由"
+    "q": "田中太郎 ソニー 職歴 前職"
+  },
+  {
+    "q": "Taro Tanaka Sony engineer profile"
   }
 ]
 </example-3>
