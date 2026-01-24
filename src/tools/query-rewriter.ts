@@ -16,19 +16,23 @@ You optimize user queries by extensively analyzing potential user intents and ge
 
 The current time is ${currentTime.toISOString()}. Current year: ${currentYear}, current month: ${currentMonth}.
 
-<intent-mining>
-To uncover the deepest user intent behind every query, analyze through these progressive layers:
+<research-intent>
+For person/OSINT research, identify the likely research purpose and tailor queries accordingly:
 
-1. Surface Intent: The literal interpretation of what they're asking for
-2. Practical Intent: The tangible goal or problem they're trying to solve
-3. Emotional Intent: The feelings driving their search (fear, aspiration, anxiety, curiosity)
-4. Social Intent: How this search relates to their relationships or social standing
-5. Identity Intent: How this search connects to who they want to be or avoid being
-6. Taboo Intent: The uncomfortable or socially unacceptable aspects they won't directly state
-7. Shadow Intent: The unconscious motivations they themselves may not recognize
+1. **Verification**: Verify claims about education, credentials, work history, certifications
+   → Use site:linkedin.com, site:university.edu, "name" + credentials + verification
 
-Map each query through ALL these layers, especially focusing on uncovering Shadow Intent.
-</intent-mining>
+2. **Reputation**: Find public perception, red flags, controversies, legal issues
+   → Search for news articles, complaints, lawsuits, reviews, public records
+
+3. **Professional**: Investigate business activities, partnerships, deals, investments
+   → Search for company affiliations, board positions, funding rounds, press releases
+
+4. **Engagement**: Find interests, activities, social presence for outreach opportunities
+   → Search for interviews, speeches, social media profiles, hobbies, causes they support
+
+Based on the query context and any known information, prioritize the most relevant research intent.
+</research-intent>
 
 <cognitive-personas>
 Generate ONE optimized query from each of these 4 cognitive perspectives (optimized for person/OSINT research):
@@ -60,10 +64,20 @@ Leverage the soundbites from the context user provides to generate queries that 
 
 <query-operators>
 For the 'q' field content:
+- "exact phrase" : use quotes for exact name match (critical for person research to avoid namesakes)
+- site:domain.com : search within specific site (linkedin.com, twitter.com, github.com, scholar.google.com)
 - +term : must include term; for critical terms that must appear
-- -term : exclude term; exclude irrelevant or ambiguous terms
-- filetype:pdf/doc : specific file type
-Note: A query can't only have operators; and operators can't be at the start of a query
+- -term : exclude term; exclude common namesakes or irrelevant results
+- filetype:pdf/doc : find resumes, papers, reports
+
+Person research site operators (use when appropriate):
+- site:linkedin.com "Person Name" : professional profile
+- site:twitter.com OR site:x.com "Person Name" : social presence
+- site:github.com "Person Name" : developer activity
+- site:scholar.google.com "Person Name" : academic publications
+- site:crunchbase.com "Person Name" : startup/investment info
+
+Note: A query can't only have operators; operators can't be at the start of a query
 </query-operators>
 </rules>
 
