@@ -637,6 +637,25 @@ app.post('/v1/chat/completions', validationRules, (async (req: Request, res: Res
     });
   }
 
+  // Keep-alive ticker — emit SSE comment lines while getResponse runs to prevent
+  // gateway/proxy idle timeouts from closing the stream during long synchronous
+  // phases (notably "beast mode" final-answer generation, which can stall the
+  // stream for tens of seconds with no chunks). SSE comments (lines starting with
+  // ":") are spec-compliant and ignored by all SSE clients (openai SDK,
+  // langchain, etc.) but reset httpx/Cloud Run idle timers.
+  let keepAliveTimer: ReturnType<typeof setInterval> | null = null;
+  if (body.stream) {
+    keepAliveTimer = setInterval(() => {
+      try { res.write(`: keep-alive\n\n`); } catch { /* socket closed */ }
+    }, 15_000);
+  }
+  const stopKeepAlive = () => {
+    if (keepAliveTimer) {
+      clearInterval(keepAliveTimer);
+      keepAliveTimer = null;
+    }
+  };
+
   try {
     const {
       result: finalStep,
@@ -666,6 +685,7 @@ app.post('/v1/chat/completions', validationRules, (async (req: Request, res: Res
       body.llm_model,
       body.llm_provider
     )
+    stopKeepAlive();
     let finalAnswer = (finalStep as AnswerAction).mdAnswer;
 
     const annotations = (finalStep as AnswerAction).references?.filter(ref => ref?.url && ref?.title && ref?.exactQuote && ref?.dateTime).map(ref => ({
@@ -807,6 +827,7 @@ app.post('/v1/chat/completions', validationRules, (async (req: Request, res: Res
       }
     }
   } catch (error: any) {
+    stopKeepAlive();
     logError('[chat/completions] Error:', {
       error: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined
